@@ -1,0 +1,16 @@
+{
+    "name": "ScriptableEnumSystem",
+    "rootNamespace": "ScriptableEnumSystem",
+    "references": [
+        "GUID:af774b380554c974291c0e542b841463"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
