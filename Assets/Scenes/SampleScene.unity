@@ -207,13 +207,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1679036974
 GameObject:
@@ -239,13 +239,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1679036974}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1679036976
 MonoBehaviour:
@@ -260,9 +260,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerType:
-    value: Tank
+    id: Tank
+    fastId: 0
+    menuFilter: Characters/PlayerTypes
   playerType2:
-    value: Tank
+    id: Marksman
+    fastId: 1
+    menuFilter: 
   enemyType:
-    value: Boss
+    id: Cannon Fodder
+    fastId: 3
+    menuFilter: 
   playerTypes: {fileID: 11400000, guid: 8ccb5296d66933b4aab81da59353ecfa, type: 2}
+  tankTypeStringValue: Tank
+  tankTypeFromStringValue:
+    id: None
+    fastId: -1
+    menuFilter: 
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 519420032}
+  - {fileID: 1679036975}
