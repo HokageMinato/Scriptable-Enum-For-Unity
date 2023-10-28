@@ -13,16 +13,20 @@ public class ScriptableEnumDemo : MonoBehaviour
     public ScriptableEnum enemyType;
 
     //ScriptableEnumsContainer for iterating all values.
-    public ScriptableEnumValueContainer playerTypes;
+    public BaseScriptableEnumValueContainer playerTypes;
 
 
     private void Start()
     {
-        //xyzScEnum.Value to utilize the value.
-        Debug.Log($"{nameof(playerType)} : {playerType.Value}"); 
-        Debug.Log($"{nameof(enemyType)} : {enemyType.Value}");
+        //xyzScEnum.String to utilize the string representation.
+        Debug.Log($"{nameof(playerType)} : {playerType.StringId}"); 
+        Debug.Log($"{nameof(enemyType)} : {enemyType.StringId}");
+        
+        //xyzScEnum.FastId to utilize the faster int counterpart.
+        Debug.Log($"{nameof(playerType)} : {playerType.FastId}"); 
+        Debug.Log($"{nameof(enemyType)} : {enemyType.FastId}");
 
-        //Utilises HashCode based on values instead of actual object.
+        //Utilises fastId for HashCode instead of actual object.
         //caches hash for optimum performance during HashSet and DictionaryLookups.
         HashSet<ScriptableEnum> playerEnums = new();
         playerEnums.Add(playerType);
@@ -32,7 +36,10 @@ public class ScriptableEnumDemo : MonoBehaviour
 
         //Also implements EquailtyComparers based on values instead of reference
         //for easy comparision accross instances.
+        //For comparision it also utilises FastID ensuring only an int comparision.
         Debug.Log($"{nameof(playerType)} == {nameof(playerType2)} : Are Same ? {playerType.Equals(playerType2)}");
+        Debug.Log($"{nameof(playerType)} == {nameof(playerType2)} : Are Same ? {playerType == playerType2}");
+        Debug.Log($"{nameof(playerType)} == {nameof(playerType2)} : Are Same ? {playerType != playerType2}");
 
 
         //Can iterate enum container to access all values, for usecases like typeof().GetEnumNames().

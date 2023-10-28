@@ -9,11 +9,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 432cf183d3fcca644910a48c2d758fa7, type: 3}
+  m_Script: {fileID: 11500000, guid: 28f1a36fc150c3c43a6557946a881769, type: 3}
   m_Name: _ScriptableEnumsContainer
   m_EditorClassIdentifier: 
-  idsData:
-  - enumName: PlayerType
-    sourceSos: {fileID: 11400000, guid: 8ccb5296d66933b4aab81da59353ecfa, type: 2}
-  - enumName: EnemyType
-    sourceSos: {fileID: 11400000, guid: 87fe57d559dfff448be63ea8ef7ca253, type: 2}
+  scriptableContainersData:
+  - v1: Default
+    v2: {fileID: 11400000, guid: 4b9d1b48650154d4aafcb7ddea1919bf, type: 2}
+  - v1: Characters/PlayerTypes
+    v2: {fileID: 11400000, guid: 8ccb5296d66933b4aab81da59353ecfa, type: 2}
+  - v1: Characters/NPCTypes
+    v2: {fileID: 11400000, guid: 87fe57d559dfff448be63ea8ef7ca253, type: 2}
+  - v1: RuntimeGenerated
+    v2: {fileID: 11400000, guid: 690dde18ac61a5548b7df6013c9a65ac, type: 2}
+  unsafeIdLkp:
+  - v1: None
+    v2: -1
+  - v1: Tank
+    v2: 0
+  - v1: Marksman
+    v2: 1
+  - v1: Fighter
+    v2: 2

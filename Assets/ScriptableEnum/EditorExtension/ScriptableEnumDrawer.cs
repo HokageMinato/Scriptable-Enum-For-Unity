@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
-
+using System;
 namespace ScriptableEnumSystem.EditorHandles
 {
     [CustomPropertyDrawer(typeof(ScriptableEnum))]
     public class ScriptableEnumDrawer : PropertyDrawer
     {
-
-        private const string NoneStr = "None";
+        private const int NO_SOURCE_ERRCODE = -2;
+        
         ScriptableEnumsContainer idSources = null;
 
         private string PrepPropertyName(SerializedProperty property) 
@@ -29,37 +29,33 @@ namespace ScriptableEnumSystem.EditorHandles
             return new string(narr.ToArray());
         }
 
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
 
             EditorGUI.BeginProperty(position, label, property);
-            
-            if (IsIdSourceNull())
-            {
-                LoadIdSource();
-            }
 
-            if (IsIdSourceNull()) 
+            if (IsIdSourceNull())
+                LoadIdSource();
+
+            if (IsIdSourceNull())
             {
                 EditorGUI.LabelField(position, new GUIContent("No Id Source Present,Create or Check Path"));
                 return;
             }
 
-            GUIContent labelToDisplay = new GUIContent(PrepPropertyName(property));
+            if (!IsIdSouceValid())
+            {
+                EditorGUI.LabelField(position, new GUIContent("Loaded Id Source is improper, make sure no errors are present"));
+                return;
+            }
+           
             GUIContent[] menu;
             string[] idChoices;
-             
+
+//            TryDrawPathFilterLabel();
             FillChoiceMenu();
-
-            string presentStringIdValue = GetPresentStringIdValueFromTargetProperty();
-            
-            int oldIndex = GetIndexBasedOf(presentStringIdValue); 
-
-            int newIndex = EditorGUI.Popup(position,labelToDisplay, oldIndex,menu);
-
-            if (newIndex != -1)
-                SetPresentStringIdValueToTargetProperty(idChoices[newIndex]);//, idChoices[newIndex].objBt);
-            
+            DrawPopup(position, menu, idChoices);
 
             EditorGUI.EndProperty();
 
@@ -70,54 +66,119 @@ namespace ScriptableEnumSystem.EditorHandles
             {
                 return idSources == null;
             }
-           
+
             void LoadIdSource()
             {
-                idSources = AssetDatabase.LoadAssetAtPath<ScriptableEnumsContainer>(PATHS.ScriptableEnumContainerAssetPath);
+                idSources = AssetDatabase.LoadAssetAtPath<ScriptableEnumsContainer>(ASSET_PATHS.ScriptableEnumContainerAssetPath);
             }
+
+            //void TryDrawPathFilterLabel()
+            //{
+            //    GUIContent filterPathLabel = GetFilterPathLabel();
+            //    if(filterPathLabel != null) 
+            //    {
+            //        var r = new Rect(position.position, position.size);
+            //        r.height += EditorGUIUtility.singleLineHeight * 2;
+            //        EditorGUI.LabelField(r, filterPathLabel);
+                    
+
+            //    }
+            //}
 
             void FillChoiceMenu()
             {
-                List<SystemIdsData> systemIdData = idSources.SystemIdsData;
+                List<PathAssetPair> systemIdData = idSources.ScriptableContainers;
                 List<GUIContent> contentList = new List<GUIContent>();
                 List<string> choices = new List<string>();
 
-                AddNoneOption(contentList,choices);
-
                 for (int i = 0; i < systemIdData.Count; i++)
                 {
-                    AddSystemIdSubMenu(contentList, choices,systemIdData[i]);
+                    AddSystemIdSubMenu(contentList, choices, systemIdData[i]);
                 }
 
                 menu = contentList.ToArray();
                 idChoices = choices.ToArray();
             }
 
-            void AddNoneOption(List<GUIContent> contentList,List<string> actualValuesList)
+            void DrawPopup(Rect position, GUIContent[] menu, string[] idChoices)
             {
-                string choiceId = NoneStr;
-                contentList.Add(new GUIContent(choiceId));
-                actualValuesList.Add(ScriptableEnum.NoneS);
+                GUIContent labelToDisplay = new GUIContent($"{PrepPropertyName(property)} [{GetMenuPathFilterProperty().stringValue}]");
+
+                string presentStringIdValue = GetPresentStringIdValueFromTargetProperty();
+                int oldIndex = GetIndexBasedOf(presentStringIdValue);
+
+                if (oldIndex != NO_SOURCE_ERRCODE)
+                {
+                    int newIndex = EditorGUI.Popup(position, labelToDisplay, oldIndex, menu);
+                    if (newIndex != -1)
+                        SetPresentStringIdValueToTargetProperty(idChoices[newIndex]);
+                }
+                else
+                {
+                    SetPresentStringIdValueToTargetProperty(idChoices[0]);
+                }
             }
 
-            void AddSystemIdSubMenu(List<GUIContent> contentList, List<string> choiceList, SystemIdsData idData)
+
+            void AddSystemIdSubMenu(List<GUIContent> contentList, List<string> choiceList, PathAssetPair idData)
             {
-                string systemId = idData.EnumName;
-                List<string> componentIds = idData.Container.Ids;
+                string systemId = idData.v1;
+                List<string> componentIds = idData.v2.Ids;
 
+                if (!CanAddPath(systemId))
+                {
+                    return;
+                }
 
-                for (int i = 0;  i < componentIds.Count; i++)
+                for (int i = 0; i < componentIds.Count; i++)
                 {
                     string choiceId = componentIds[i];
-                    contentList.Add(new GUIContent($"{systemId}/{choiceId}"));
+                    systemId = ApplyPathFilter(systemId);
+
+                    if (string.IsNullOrEmpty(systemId) || string.IsNullOrWhiteSpace(systemId))
+                        contentList.Add(new GUIContent($"{choiceId}"));
+                    else
+                        contentList.Add(new GUIContent($"{systemId}/{choiceId}"));
+
                     choiceList.Add(choiceId);
                 }
 
             }
-            
-            int GetIndexBasedOf(string presentValue) 
+
+
+            string ApplyPathFilter(string originalPath)
             {
-                
+                string menuPathFilterValue = GetMenuPathFilterProperty().stringValue;
+
+                if (string.IsNullOrEmpty(menuPathFilterValue)
+                   || string.IsNullOrWhiteSpace(menuPathFilterValue)
+                   || originalPath.Contains(ScriptableEnumsContainer.DEFAULT_CONTAINER_MENU_PATH)
+                   || originalPath.Contains(ScriptableEnumsContainer.RUNTIME_CONTAINER_MENU_PATH)
+                   || originalPath.Length < menuPathFilterValue.Length)
+                {
+                    return originalPath;
+                }
+
+                return originalPath.Remove(0, menuPathFilterValue.Length);
+            }
+
+
+            bool CanAddPath(string originalPath)
+            {
+                string menuPathFilterValue = GetMenuPathFilterProperty().stringValue;
+
+                if (string.IsNullOrEmpty(menuPathFilterValue)
+                     || string.IsNullOrWhiteSpace(menuPathFilterValue)
+                     || originalPath.Contains(ScriptableEnumsContainer.DEFAULT_CONTAINER_MENU_PATH)
+                     || originalPath.Contains(ScriptableEnumsContainer.RUNTIME_CONTAINER_MENU_PATH))
+                    return true;
+
+                return originalPath.Contains(menuPathFilterValue);
+            }
+
+
+            int GetIndexBasedOf(string presentValue)
+            {
                 for (int i = 0; i < idChoices.Length; i++)
                 {
                     if (idChoices[i] == presentValue)
@@ -126,28 +187,60 @@ namespace ScriptableEnumSystem.EditorHandles
                     }
                 }
 
-                return ScriptableEnum.NoneI;
+                Debug.Log($"{presentValue} isnt present in any scriptable container, make sure values are intact, Fixing");
+                return NO_SOURCE_ERRCODE;
             }
 
-            string GetPresentStringIdValueFromTargetProperty() 
+
+            string GetPresentStringIdValueFromTargetProperty()
             {
                 return GetProperty().stringValue;
             }
-            
-            void SetPresentStringIdValueToTargetProperty(string value)//,int idVal) 
+
+
+            void SetPresentStringIdValueToTargetProperty(string value)
             {
-               GetProperty().stringValue = value;
+                GetProperty().stringValue = value;
+                GetIntProperty().intValue = idSources.GetUnsafeId(value);
             }
 
-            SerializedProperty GetProperty() 
+
+            GUIContent GetFilterPathLabel()
             {
-                return property.FindPropertyRelative(ScriptableEnum.SerializedValueName);
+                var labelFilter = GetMenuPathFilterProperty().stringValue;
+
+                if (string.IsNullOrEmpty(labelFilter)
+                 || string.IsNullOrWhiteSpace(labelFilter))
+                    return null;
+
+                return new GUIContent(GetMenuPathFilterProperty().stringValue);
             }
+
+            SerializedProperty GetProperty()
+            {
+                return property.FindPropertyRelative(ScriptableEnum.ValueFieldName);
+            }
+
+            SerializedProperty GetIntProperty()
+            {
+                return property.FindPropertyRelative(ScriptableEnum.intFieldName);
+            }
+
+            SerializedProperty GetMenuPathFilterProperty()
+            {
+                return property.FindPropertyRelative(ScriptableEnum.menuPathFieldName);
+            }
+
+         
             #endregion
 
         }
 
 
+        private bool IsIdSouceValid()
+        {
+            return idSources.CheckValidity();
 
+        }
     }
 }

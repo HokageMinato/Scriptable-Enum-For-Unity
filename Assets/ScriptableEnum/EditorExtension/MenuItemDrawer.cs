@@ -9,10 +9,10 @@ namespace ScriptableEnumSystem.EditorHandles
 
     public class MenuBarItems : Editor 
     {
-        [MenuItem(("Thor/ScriptableEnumSystem/ScriptableEnumContainer"))]
+        [MenuItem(("ScriptableEnumSystem/ScriptableEnumContainer"))]
         public static void CreateIdContainer()
         {
-            const string ASSET_PATH = PATHS.ScriptableEnumContainerAssetPath;
+            const string ASSET_PATH = ASSET_PATHS.ScriptableEnumContainerAssetPath;
             ValidateFolderHierarchy();
             CreateSOIfNotPresent(ASSET_PATH);
 

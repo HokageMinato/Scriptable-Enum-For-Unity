@@ -1,15 +1,15 @@
 using UnityEngine;
-
 using System.Collections.Generic;
 
 namespace ScriptableEnumSystem
 {
-    [CreateAssetMenu(fileName = nameof(ScriptableEnumValueContainer), menuName = "ScriptableEnum/"+nameof(ScriptableEnumValueContainer))]
-    public class ScriptableEnumValueContainer : ScriptableObject
+    [CreateAssetMenu(fileName = "RuntimeIdContainer", menuName = "Scriptable Objects/ScriptableEnum/RuntimeIdContainer")]
+    public class BaseScriptableEnumValueContainer : ScriptableObject
     {
-        [SerializeField] private List<string> _ids;
 
-        public List<string> Ids => _ids;
+        [SerializeField] protected List<string> _ids;
+
+        public virtual List<string> Ids  {   get { return _ids; }  }
 
     }
 }
