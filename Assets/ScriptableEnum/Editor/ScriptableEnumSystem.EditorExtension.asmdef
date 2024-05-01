@@ -2,9 +2,7 @@
     "name": "ScriptableEnumSystem.EditorExtension",
     "rootNamespace": "ScriptableEnumSystem.EditorExtension",
     "references": [
-        "GUID:e787956ee7669144a9b3f0086e277d80",
-        "GUID:24d2ba267f2dbdb47b983fdb4171f58e",
-        "GUID:af774b380554c974291c0e542b841463"
+        "GUID:e787956ee7669144a9b3f0086e277d80"
     ],
     "includePlatforms": [
         "Editor"
